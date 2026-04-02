@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <title>SkillSwap Chat Test</title>
+        <meta charset="UTF-8">
+        <style>
+            body { font-family: Arial; padding: 20px; }
+            #messages { border: 1px solid #ccc; height: 300px; overflow-y: scroll; padding: 10px; margin-bottom: 10px;}
+        </style>
+    </head>
+    <body>
+        <h2>Тест WebSockets SkillSwap</h2>
+
+        <label>Токен (без Bearer):</label><br>
+        <input type="text" id="token" style="width: 300px;"><br><br>
+
+        <label>ID Сделки:</label><br>
+        <input type="number" id="dealId" value="1"><br><br>
+
+        <button onclick="connect()">Подключиться к чату</button>
+        <hr>
+
+        <div id="chatRoom" style="display:none;">
+            <div id="messages"></div>
+            <input type="text" id="messageText" placeholder="Напиши что-нибудь..." autocomplete="off"/>
+            <button onclick="sendMessage()">Отправить</button>
+        </div>
+
+        <script>
+            let ws;
+
+            function connect() {
+                let token = document.getElementById("token").value;
+                let dealId = document.getElementById("dealId").value;
+
+                // Вот она, магия подключения к твоему FastAPI!
+                ws = new WebSocket(`ws://localhost:8080/chat/${dealId}?token=${token}`);
+
+                ws.onopen = function() {
+                    document.getElementById("chatRoom").style.display = "block";
+                    alert("Успешно подключились!");
+                };
+
+                // Эта функция срабатывает каждый раз, когда сервер присылает сообщение
+                ws.onmessage = function(event) {
+                    let messages = document.getElementById('messages');
+                    let message = document.createElement('div');
+
+                    // Парсим JSON, который ты формировал в message_data
+                    let data = JSON.parse(event.data);
+
+                    message.innerHTML = `<b>Юзер ${data.sender_id}:</b> ${data.content}`;
+                    messages.appendChild(message);
+                    messages.scrollTop = messages.scrollHeight; // автоскролл вниз
+                };
+
+                ws.onclose = function(event) {
+                    if (event.code === 1008) {
+                        alert("Ошибка 1008: Фейсконтроль не пройден (не твой чат или кривой токен)");
+                    } else {
+                        alert("Соединение закрыто");
+                    }
+                };
+            }
+
+            function sendMessage() {
+                let input = document.getElementById("messageText");
+                ws.send(input.value); // Отправляем текст на сервер
+                input.value = '';
+            }
+        </script>
+    </body>
+</html>

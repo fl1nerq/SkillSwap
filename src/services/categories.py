@@ -12,7 +12,7 @@ from src.schemas.schemas import CategoriesCreate
 
 async def get_categories(session: AsyncSession):
 
-    stmt = select(Category.name)
+    stmt = select(Category)
     result = await session.execute(stmt)
     return result.scalars().all()
 
@@ -36,3 +36,5 @@ async def create_categories(data: CategoriesCreate, session: AsyncSession):
         await session.commit()
 
     return {"message": f"Successfully added {added_count} new categories"}
+
+
