@@ -23,7 +23,6 @@ SkillSwap is an asynchronous RESTful API designed for skill exchange between use
 2. Create an environment variables file based on the provided example:
 cp .env.example .env
 
-
 3. Build and start the services using Docker Compose:
 docker-compose up --build
 
